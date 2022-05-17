@@ -1,6 +1,7 @@
 { lib
 , stdenv
 , fetchFromGitHub
+, fetchpatch
 , nix-update-script
 , substituteAll
 , meson
@@ -23,20 +24,27 @@
 
 stdenv.mkDerivation rec {
   pname = "switchboard-plug-keyboard";
-  version = "2.7.0";
+  version = "3.1.0";
 
   src = fetchFromGitHub {
     owner = "elementary";
     repo = pname;
     rev = version;
-    sha256 = "sha256-ge87rctbd7iR9x9Xq4sMIC09DiPHbpbWBgMZUuJNWbw=";
+    sha256 = "sha256-OMcySVnOkXy236YRldVK1hB1zCWMBhcGnCsqQOU08wo=";
   };
 
   patches = [
     ./0001-Remove-Install-Unlisted-Engines-function.patch
     (substituteAll {
       src = ./fix-paths.patch;
-      inherit ibus onboard;
+      inherit ibus onboard libgnomekbd;
+    })
+
+    # Fix crash with non-ubuntu GSD, can be removed on next update
+    # https://github.com/elementary/switchboard-plug-keyboard/pull/427
+    (fetchpatch {
+      url = "https://github.com/elementary/switchboard-plug-keyboard/commit/4426499594f274bd092a603ba9a53e2840848288.patch";
+      sha256 = "sha256-UI6B99WBQazs4+A9qidJrqopEsv8701SrsU9JpFhIkM=";
     })
   ];
 
@@ -55,7 +63,6 @@ stdenv.mkDerivation rec {
     gtk3
     ibus
     libgee
-    libgnomekbd
     libhandy
     libxklavier
     switchboard
